@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Agent conversationnel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Agent conversationnel</h1>
+    <div class="topbar-actions">
+      <span id="status-pill" class="pill">Non configuré</span>
+      <button id="btn-new" type="button" class="ghost">Nouvelle conversation</button>
+      <button id="btn-settings" type="button">Réglages</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section id="chat" class="chat" aria-live="polite">
+      <div id="empty-state" class="empty">
+        <h2>Bienvenue</h2>
+        <p>Pour commencer, ouvrez <strong>Réglages</strong>, choisissez votre fournisseur (Groq, OpenAI, Mistral…) et collez votre clé API.</p>
+        <p class="muted">Votre clé reste dans votre navigateur. Elle n'est envoyée qu'au fournisseur que vous avez choisi, jamais à ce site.</p>
+      </div>
+      <div id="messages"></div>
+    </section>
+
+    <form id="composer" class="composer" autocomplete="off">
+      <textarea id="input" rows="1" placeholder="Écrivez votre message… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)" required></textarea>
+      <button id="btn-send" type="submit">Envoyer</button>
+      <button id="btn-stop" type="button" class="danger" hidden>Arrêter</button>
+    </form>
+  </main>
+
+  <dialog id="settings">
+    <form id="settings-form" method="dialog" autocomplete="off">
+      <h2>Réglages</h2>
+
+      <label for="provider">Fournisseur</label>
+      <select id="provider"></select>
+      <p id="provider-note" class="note"></p>
+
+      <label for="base-url">URL de l'API</label>
+      <input id="base-url" type="url" spellcheck="false" required>
+
+      <label for="api-key">Clé API</label>
+      <div class="row">
+        <input id="api-key" type="password" spellcheck="false" autocomplete="off">
+        <button id="btn-toggle-key" type="button" class="ghost">Afficher</button>
+      </div>
+      <p class="note">Obtenir une clé : <a id="key-link" href="#" target="_blank" rel="noopener noreferrer"></a></p>
+
+      <label class="check">
+        <input id="remember" type="checkbox">
+        Mémoriser la clé sur cet appareil (sinon elle est oubliée à la fermeture de l'onglet)
+      </label>
+
+      <label for="model">Modèle</label>
+      <div class="row">
+        <input id="model" list="model-list" spellcheck="false" required>
+        <button id="btn-models" type="button" class="ghost">Charger la liste</button>
+      </div>
+      <datalist id="model-list"></datalist>
+
+      <label for="system">Instructions système (facultatif)</label>
+      <textarea id="system" rows="3" placeholder="Ex. : Tu es un assistant qui répond en français, de façon concise."></textarea>
+
+      <label for="temperature">Température : <span id="temp-value"></span></label>
+      <input id="temperature" type="range" min="0" max="1.5" step="0.1">
+
+      <p id="settings-msg" class="note" role="status"></p>
+
+      <div class="dialog-actions">
+        <button id="btn-forget" type="button" class="danger ghost">Effacer mes clés</button>
+        <span class="spacer"></span>
+        <button id="btn-test" type="button" class="ghost">Tester la connexion</button>
+        <button id="btn-save" type="submit" value="save">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
