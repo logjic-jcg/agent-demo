@@ -59,10 +59,10 @@
 
       <label for="model">Modèle</label>
       <div class="row">
-        <input id="model" list="model-list" spellcheck="false" required>
+        <input id="model" spellcheck="false" required>
         <button id="btn-models" type="button" class="ghost">Charger la liste</button>
       </div>
-      <datalist id="model-list"></datalist>
+      <select id="model-select" hidden aria-label="Modèles disponibles"></select>
 
       <label for="system">Instructions système (facultatif)</label>
       <textarea id="system" rows="3" placeholder="Ex. : Tu es un assistant qui répond en français, de façon concise."></textarea>

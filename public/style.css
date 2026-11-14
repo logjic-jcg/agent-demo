@@ -177,3 +177,4 @@ dialog input[type="range"] { width: 100%; }
   .msg.assistant { margin-right: 0; }
   .topbar h1 { font-size: 16px; }
 }
+#model-select { margin-top: 8px; }

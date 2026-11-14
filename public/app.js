@@ -154,7 +154,7 @@
     dialog: $("settings"), form: $("settings-form"), provider: $("provider"),
     providerNote: $("provider-note"), baseUrl: $("base-url"), apiKey: $("api-key"),
     toggleKey: $("btn-toggle-key"), keyLink: $("key-link"), remember: $("remember"),
-    model: $("model"), modelList: $("model-list"), loadModels: $("btn-models"),
+    model: $("model"), modelSelect: $("model-select"), loadModels: $("btn-models"),
     system: $("system"), temperature: $("temperature"), tempValue: $("temp-value"),
     settingsMsg: $("settings-msg"), forget: $("btn-forget"), test: $("btn-test"),
   };
@@ -286,7 +286,7 @@
       400: "Requête refusée : le nom du modèle est peut-être incorrect.",
       401: "Clé API invalide ou expirée.",
       403: "Accès refusé : la clé n'a pas les droits pour ce modèle, ou le compte n'est pas activé.",
-      404: "Introuvable : vérifiez l'URL de l'API et le nom du modèle.",
+      404: "Introuvable : le modèle n'est sans doute pas disponible avec votre clé. Cliquez sur « Charger la liste » pour en choisir un disponible.",
       429: "Trop de requêtes ou quota épuisé : attendez un peu ou vérifiez votre crédit chez le fournisseur.",
     };
     const hint = hints[res.status] || (res.status >= 500 ? "Le fournisseur rencontre un problème, réessayez plus tard." : "");
@@ -475,7 +475,8 @@
     } else {
       el.keyLink.parentElement.hidden = true;
     }
-    el.modelList.replaceChildren();
+    el.modelSelect.replaceChildren();
+    el.modelSelect.hidden = true;
     setSettingsMsg("");
   }
 
@@ -587,15 +588,31 @@
     el.loadModels.disabled = true;
     try {
       const models = await listModels(f);
-      el.modelList.replaceChildren(...models.map((id) => Object.assign(document.createElement("option"), { value: id })));
-      setSettingsMsg(models.length
-        ? `${models.length} modèles trouvés. Cliquez dans le champ « Modèle » pour choisir (ou effacez-le pour voir toute la liste).`
-        : "Le fournisseur n'a renvoyé aucun modèle.", models.length ? "ok" : "bad");
+      const placeholder = Object.assign(document.createElement("option"), { value: "", textContent: "— Choisir un modèle dans la liste —" });
+      el.modelSelect.replaceChildren(placeholder, ...models.map((id) => Object.assign(document.createElement("option"), { value: id, textContent: id })));
+      el.modelSelect.hidden = !models.length;
+      if (!models.length) {
+        setSettingsMsg("Le fournisseur n'a renvoyé aucun modèle.", "bad");
+      } else if (models.includes(f.model)) {
+        el.modelSelect.value = f.model;
+        setSettingsMsg(`${models.length} modèles trouvés. Le modèle « ${f.model} » est disponible. Vous pouvez en choisir un autre dans la liste déroulante.`, "ok");
+      } else {
+        // Le modèle saisi n'est pas proposé : on en choisit un de discussion automatiquement.
+        const notChat = /whisper|tts|speech|audio|embed|guard|moderation|transcri|image|dall-e|playai|orpheus/i;
+        const pick = models.find((id) => !notChat.test(id)) || models[0];
+        el.model.value = pick;
+        el.modelSelect.value = pick;
+        setSettingsMsg(`${models.length} modèles trouvés. « ${f.model || "(vide)"} » n'y figure pas : j'ai sélectionné « ${pick} ». Vous pouvez en choisir un autre dans la liste déroulante. Cliquez ensuite sur « Tester la connexion ».`, "ok");
+      }
     } catch (err) {
       setSettingsMsg(errorText(err) || "Échec du chargement.", "bad");
     } finally {
       el.loadModels.disabled = false;
     }
+  });
+
+  el.modelSelect.addEventListener("change", () => {
+    if (el.modelSelect.value) el.model.value = el.modelSelect.value;
   });
 
   el.test.addEventListener("click", async () => {
